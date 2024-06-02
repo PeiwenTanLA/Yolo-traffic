@@ -1,0 +1,166 @@
+ Check if GPU is available
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# Example: Create a tensor and move it to the GPU
+x = torch.randn(3, 3)
+x = x.to(device)
+print(x)
+
+# Install necessary libraries
+!pip install diffusers["torch"] transformers
+!pip install accelerate
+!pip install git+https://github.com/huggingface/diffusers
+
+# Import libraries
+import torch
+from diffusers import StableDiffusionPipeline
+
+# Load the Stable Diffusion model and move it to the GPU
+pipe = StableDiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5", torch_dtype=torch.float16)
+pipe = pipe.to("cuda")
+
+# Define the prompt and generate an image
+prompt = "a photo of an astronaut riding a horse on mars"
+image = pipe(prompt).images[0]
+
+# Display the generated image
+image.show()
+
+import numpy as np
+import pandas as pd
+import cv2
+
+from sklearn.utils import shuffle
+from matplotlib.patches import Rectangle
+import matplotlib.pyplot as plt
+
+import warnings
+
+warnings.simplefilter('ignore')
+
+df = pd.read_csv('/Users/apple/Desktop/-+/yolo/labels_train.csv')
+df = shuffle(df)
+df.head()
+
+from google.colab import files
+uploaded = files.upload()
+
+import pandas as pd
+from sklearn.utils import shuffle
+
+# Assume the file name is 'labels_train.csv' after uploading
+df = pd.read_csv('labels_train.csv')
+df = shuffle(df)
+df.head()
+
+
+
+classes = df.class_id.unique()
+print(classes)
+
+labels = { 1:'car', 2:'truck', 3:'person', 4:'bicycle', 5:'traffic light'}
+
+from google.colab import files
+uploaded = files.upload()
+
+import tarfile
+
+# Extract the tar file
+tar_path = 'images.tar'
+extracted_path = './images'  # Directory where images will be extracted
+
+# Open and extract the tar file
+with tarfile.open(tar_path, 'r') as tar:
+    tar.extractall(path=extracted_path)
+
+# Get path images and boxes (x,y) for each class_id
+boxes = {}
+images = {}
+
+base_path = './images/'
+
+for class_id in classes:
+    first_row = df[df['class_id'] == class_id].iloc[0]
+
+    images[class_id] = cv2.imread(base_path + first_row['frame'])
+    boxes[class_id] = [first_row['xmin'],first_row['xmax'],first_row['ymin'],first_row['ymax']]
+
+for i in classes:
+
+    xmin, xmax, ymin, ymax = boxes[i][0], boxes[i][1], boxes[i][2], boxes[i][3]
+
+    plt.figure(figsize=(8, 10))
+    plt.title("Label " + labels[i])
+    plt.imshow(images[i])
+    plt.gca().add_patch(plt.Rectangle((xmin, ymin), xmax-xmin, ymax-ymin, color='yellow', fill=False, linewidth=2))
+
+    plt.show()
+
+!pip install ultralytics
+
+from ultralytics import YOLO
+import PIL
+from PIL import Image
+from IPython.display import display
+import os
+import pathlib
+
+model = YOLO("yolov8m.pt")
+
+from google.colab import files
+uploaded = files.upload()
+
+results=model.predict(source="1478019956680248165.jpg",
+              save=True, conf=0.2,iou=0.5)
+
+result = results[0]
+box = result.boxes[0]
+
+for result in results:
+    boxes = result.boxes  # Boxes object for bbox outputs
+    masks = result.masks  # Masks object for segmentation masks outputs
+    probs = result.probs  # Class probabilities for classification outputs
+
+cords = box.xyxy[0].tolist()
+class_id = box.cls[0].item()
+conf = box.conf[0].item()
+print("Object type:", class_id)
+print("Coordinates:", cords)
+print("Probability:", conf)
+
+for box in result.boxes:
+    class_id = result.names[box.cls[0].item()]
+    cords = box.xyxy[0].tolist()
+    cords = [round(x) for x in cords]
+    conf = round(box.conf[0].item(), 2)
+    print("Object type:", class_id)
+    print("Coordinates:", cords)
+    print("Probability:", conf)
+    print("---")
+
+from google.colab import files
+uploaded = files.upload()
+
+results1 = model.predict(source="1478020211690815798.jpg",
+              save=True, conf=0.2,iou=0.5)
+
+Results = results1[0]
+
+# Plotting results
+plot = results1[0].plot()
+plot = cv2.cvtColor(plot, cv2.COLOR_BGR2RGB)
+display(Image.fromarray(plot))
+
+# Ensure necessary libraries are imported
+import cv2
+from PIL import Image
+import matplotlib.pyplot as plt
+
+# Assuming results1 is already defined and contains the prediction results
+plot = results1[0].plot()  # Obtain the plot from the first result
+
+# Convert the plot from BGR to RGB
+plot = cv2.cvtColor(plot, cv2.COLOR_BGR2RGB)
+
+# Display the image
+display(Image.fromarray(plot))
